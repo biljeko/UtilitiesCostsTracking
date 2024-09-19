@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 import subprocess
+import datetime
+
 
 class App:
     def __init__(self, root):
@@ -119,6 +121,44 @@ class App:
         cursor = conn.cursor()
 
         try:
+            # Récupérer les dates
+            date_debut_str = date_debut_entry.get()
+            date_fin_str = date_fin_entry.get()
+
+            # Fonction pour valider le format et la validité des dates
+            def validate_date(date_str):
+                try:
+                    # Vérifie que la date est au format YYYY-MM-DD
+                    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+                    year = date_obj.year
+                    month = date_obj.month
+                    day = date_obj.day
+
+                    # Vérifie que l'année, le mois et le jour sont dans les plages valides
+                    if not (1000 <= year <= 10000):
+                        return False
+                    if not (1 <= month <= 12):
+                        return False
+                    if not (1 <= day <= 31):
+                        return False
+
+                    return date_obj
+                except ValueError:
+                    return False
+
+            # Valider les dates de début et de fin
+            date_debut = validate_date(date_debut_str)
+            date_fin = validate_date(date_fin_str)
+
+            if not (date_debut and date_fin):
+                messagebox.showerror("Erreur de saisie", "Les dates doivent être au format AAAA-MM-JJ et valides.")
+                return
+
+            # Vérifier que la date de fin est après la date de début
+            if date_fin <= date_debut:
+                messagebox.showerror("Erreur de saisie", "La date de fin doit être après la date de début.")
+                return
+
             # Parcourir tous les services et leurs coûts associés
             for service_id, entry in cost_entries.items():
                 cout = entry.get()
@@ -126,19 +166,12 @@ class App:
                 if cout:  # Si un coût a été entré
                     try:
                         cout = float(cout)  # Convertir en float
-                        date_debut = date_debut_entry.get()
-                        date_fin = date_fin_entry.get()
-
-                        # Vérifier que les dates sont au bon format
-                        if len(date_debut) != 10 or len(date_fin) != 10:
-                            messagebox.showerror("Erreur de saisie", "Les dates doivent être au format AAAA-MM-JJ")
-                            return
 
                         # Insertion dans la base de données
                         cursor.execute('''
                             INSERT INTO couts (service_id, cout, date_debut, date_fin)
                             VALUES (?, ?, ?, ?)
-                        ''', (service_id, cout, date_debut, date_fin))
+                        ''', (service_id, cout, date_debut_str, date_fin_str))
 
                     except ValueError:
                         messagebox.showerror("Erreur de saisie", f"Le coût pour le service n'est pas un nombre valide.")

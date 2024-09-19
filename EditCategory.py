@@ -7,6 +7,9 @@ class CategoryManager:
         self.root = root
         self.root.title("Gestion des Catégories")
 
+        # Ajuster la taille de la fenêtre
+        self.root.geometry("500x700")
+
         self.create_widgets()
         self.load_categories()
 
@@ -66,14 +69,17 @@ class CategoryManager:
         if new_name and new_group:
             # Ajouter la catégorie dans l'affichage
             position = len(self.tree.get_children()) + 1
-            self.tree.insert("", tk.END, values=(new_name, new_group, position))
-            # Ajouter la nouvelle catégorie à la base de données
-            conn = sqlite3.connect('services.db')
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO services (nom, groupe, position) VALUES (?, ?, ?)", (new_name, new_group, position))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo("Ajouté", f"La catégorie '{new_name}' a été ajoutée avec succès.")
+            if position <= 20:  # Limiter à 20 éléments
+                self.tree.insert("", tk.END, values=(new_name, new_group, position))
+                # Ajouter la nouvelle catégorie à la base de données
+                conn = sqlite3.connect('services.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO services (nom, groupe, position) VALUES (?, ?, ?)", (new_name, new_group, position))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Ajouté", f"La catégorie '{new_name}' a été ajoutée avec succès.")
+            else:
+                messagebox.showwarning("Limite atteinte", "Vous ne pouvez pas ajouter plus de 20 catégories.")
 
     def delete_category(self):
         selected_item = self.tree.selection()
@@ -152,7 +158,7 @@ class CategoryManager:
         # Réorganiser les catégories
         for index, item in enumerate(self.tree.get_children()):
             category_name, category_group, _ = self.tree.item(item, 'values')
-            cursor.execute('''
+            cursor.execute(''' 
                 UPDATE services
                 SET nom = ?, groupe = ?, position = ?
                 WHERE nom = ?
