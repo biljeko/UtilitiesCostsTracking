@@ -26,7 +26,7 @@ class App:
         self.add_data_button = tk.Button(button_frame, text="Ajout de données", command=self.show_add_data_form)
         self.add_data_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-        self.generate_graph_button = tk.Button(button_frame, text="Graphique", command=self.run_generate_graph)
+        self.generate_graph_button = tk.Button(button_frame, text="Graphique", command=self.show_graph_menu)
         self.generate_graph_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         self.config_button = tk.Button(button_frame, text="Configuration", command=self.show_config_menu)
@@ -155,12 +155,29 @@ class App:
         self.clear_display_frame()
         tk.Label(self.display_frame, text="Coûts ajoutés avec succès !").pack()
 
-    def run_generate_graph(self):
+    def run_generate_graph1(self):
         try:
-            # Exécute le script generer_graph.py dans une fenêtre séparée
-            subprocess.Popen(['python', 'generer_graph.py'])
+            # Exécute le script generer_graph1.py dans une fenêtre séparée
+            subprocess.Popen(['python', 'generer_graph1.py'])
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur: {e}")
+
+    def run_generate_graph2(self):
+        try:
+            # Exécute le script generer_graph1.py dans une fenêtre séparée
+            subprocess.Popen(['python', 'generer_graph2.py'])
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur: {e}")
+
+    def show_graph_menu(self):
+        self.clear_display_frame()
+        config_frame = tk.Frame(self.display_frame)
+        config_frame.pack(fill=tk.BOTH, expand=True)
+
+        tk.Label(config_frame, text="Graphs", font=("Arial", 16)).pack(pady=10)
+
+        tk.Button(config_frame, text="Histograme par catégorie", command=self.run_generate_graph1).pack(pady=5)
+        tk.Button(config_frame, text="Graphiques d'aires empilés", command=self.run_generate_graph2).pack(pady=5)
 
     def show_config_menu(self):
         self.clear_display_frame()
